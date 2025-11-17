@@ -73,6 +73,8 @@ plugins:
   - mermaid2
   - git-revision-date-localized:
       enable_creation_date: true
+      fallback_to_build_date: true
+      enable_parallel_processing: false
   - glightbox
   - minify:
       minify_html: true
