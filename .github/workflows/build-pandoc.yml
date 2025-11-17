@@ -55,48 +55,10 @@ jobs:
           git config --global --add safe.directory $(pwd)
           make pdf-one
 
-      - name: Build TeX source (debug)
-        env:
-          HOME: /root
-          PDF_ENGINE: tectonic
-        run: |
-          git config --global --add safe.directory $(pwd)
-          pandoc docs/content/00_index.md \
-                 docs/content/01_introduce.md \
-                 docs/content/02_usage/00_mcp.md \
-                 docs/content/02_usage/01_direct.md \
-                 docs/content/02_usage/02_assit.md \
-                 docs/content/02_usage/03_option.md \
-                 docs/content/02_usage/04_tui.md \
-                 docs/content/02_usage/05_faq.md \
-                 docs/content/03_workflow.md \
-                 docs/content/04_customize.md \
-                 docs/content/05_tool_list.md \
-                 --from=markdown+table_captions+grid_tables+header_attributes+pipe_tables \
-                 --table-of-contents \
-                 --toc-depth=3 \
-                 --number-sections \
-                 --metadata=title:"UCAgent 开发者手册" \
-                 --metadata=subtitle:"9d0cd00" \
-                 --resource-path=.:docs:docs/content:docs/content/02_usage \
-                 --highlight-style=tango \
-                 --filter pandoc-crossref \
-                 --lua-filter=docs/pandoc/auto_colwidth.lua \
-                 --pdf-engine=tectonic \
-                 -V documentclass=ctexart \
-                 -V geometry:margin=2.2cm \
-                 -V mainfont="Noto Serif CJK SC" \
-                 -V monofont="DejaVu Sans Mono" \
-                 -V fontsize=11pt \
-                 -H docs/pandoc/header.tex \
-                 -V fig-pos=H \
-                 -o ucagent-doc.tex
-
       - name: Upload PDFs
         uses: actions/upload-artifact@v4
         with:
           name: ucagent-doc
           path: |
             ucagent-doc.pdf
-            ucagent-doc.tex
 
