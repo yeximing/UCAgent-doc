@@ -3,6 +3,7 @@
 AI Agent for Automated Unit Test Verification Based on Large Language Models
 
 [中文介绍](/README.zh.md)
+[UCAgent Online Documentation](https://open-verify.cc/mlvp/en/docs/ucagent/)
 
 ## Project Overview
 
@@ -15,6 +16,11 @@ UCAgent is an automated hardware verification AI agent based on large language m
 - Consistency between documentation, code, and reports
 
 UCAgent provides comprehensive Agent-to-LLM interaction logic, supports three intelligent modes (standard, enhanced, advanced), and integrates rich file operation tools for direct interaction with large language models through standardized APIs. Based on the Picker & Toffee framework, chip verification is essentially equivalent to software testing. **Therefore, existing programming-focused AI Agents (such as OpenHands, Copilot, Claude Code, Gemini-CLI, Qwen-Code, etc.) can achieve deep collaboration with UCAgent through the MCP protocol, realizing better verification results and higher levels of automation.**
+
+### Documentation
+
+More usage and detail tutorials: [UCAgent Online Documentation](https://open-verify.cc/mlvp/en/docs/ucagent/)
+Deploy locally [UCAgent Local Documentation](https://open-verify.cc/mlvp/docs/ucagent/)
 
 ---
 
@@ -113,126 +119,32 @@ Hints:
 - Please write a validation prompt according to the task requirements
 - When the Code Agent stops halfway, you can enter prompts: `continue and use the tools Check and Complete to determine if all tasks have been completed`
 
-### Documentation Build & Preview (MkDocs)
+### Common Operations
 
-Makefile provides helper targets for docs (MkDocs + Material):
+##### TUI shortcuts
 
-| Target              | Purpose                                              | When to Use                         |
-| ------------------- | ---------------------------------------------------- | ----------------------------------- |
-| `make docs-help`    | Show documentation-related targets help text         | View available commands             |
-| `make docs-install` | Install build deps from `docs/requirements-docs.txt` | First time or deps update           |
-| `make docs-serve`   | Local preview (default: 127.0.0.1:8030)              | When developing/previewing          |
-| `make docs-build`   | Build static site into `./site`                      | Generate production version locally |
-| `make docs-clean`   | Remove `./site` directory                            | When cleaning build artifacts       |
+- `ctrl + up/down/left/right`: Adjust UI layout
+- `shift + up/down`: Adjust status panel height
+- `shift + right`: Clear console
+- `shift + left`: Clear input
+- `esc`: Force refresh UI
 
-#### Usage Workflow
+##### Stage color hints
 
-**First Time Setup (Install Dependencies):**
+- `White`: Pending
+- `Red`: Running
+- `Green`: Passed
+- `*`: Stage requires human check; run `hmcheck_pass [msg]` to continue
+- `Yellow`: Skipped
 
-```bash
-make docs-install    # Install mkdocs, material theme, and other dependencies
-```
-
-**Daily Development (Preview Docs):**
-
-```bash
-make docs-serve      # Start local server, visit http://127.0.0.1:8030 to view
-# Browser auto-refreshes when you edit docs
-```
-
-**Local Generation (Build Production Version):**
-
-```bash
-make docs-build      # Generate static site to ./site directory
-# Open ./site/index.html in your local browser to view
-make docs-clean      # Clean build artifacts (optional)
-```
-
-#### Complete Workflow Example
-
-```bash
-# 1. Initial setup: Install dependencies
-make docs-install
-
-# 2. Development phase: Preview docs (can run repeatedly)
-make docs-serve      # Visit http://127.0.0.1:8030 in browser
-# ...edit docs...
-# Press Ctrl+C to stop server
-
-# 3. Local generation: Build production version
-make docs-build      # Generate ./site directory
-# Open ./site/index.html in your local browser to view
-
-# 4. Cleanup (optional)
-make docs-clean      # Remove ./site directory
-```
-
-#### Notes
-
-- Host/port currently fixed in Makefile; edit if you need different values.
-- `make docs-serve` is for development use, supports hot reload
-- `make docs-build` generates complete static website files to ./site directory, can be previewed locally (open ./site/index.html)
-
-### PDF Manual Build (Pandoc + XeLaTeX)
-
-High-quality PDF (developer manual) build rules:
-
-| Target           | Purpose                                               |
-| ---------------- | ----------------------------------------------------- |
-| `make pdf`       | Build `ucagent-doc.pdf` from ordered markdown sources |
-| `make pdf-one`   | Same as `pdf` (CI convenience wrapper)                |
-| `make pdf-clean` | Remove generated PDF and LaTeX aux files              |
-
-Examples:
-
-```bash
-make pdf
-make MONO="JetBrains Mono" pdf       # override monospaced font
-make TWOSIDE=1 pdf                    # two‑sided layout (filename adds -twoside)
-make pdf-clean
-```
-
-Requirements: pandoc, XeLaTeX (TexLive), Chinese font "Noto Serif CJK SC", monospaced font (default DejaVu Sans Mono), optional filter `pandoc-crossref`.
-
-Customization vars:
-
-- `MONO` override monospaced font.
-- `TWOSIDE` non-empty enables two-sided layout.
-
-Troubleshooting:
-
-- Missing font: install CJK fonts (e.g. `fonts-noto-cjk`).
-- LaTeX errors: ensure XeLaTeX packages (consider full TexLive).
-- Crossrefs missing: ensure `pandoc-crossref` in PATH.
-
-Output file: `ucagent-doc.pdf` suitable for release distribution.
-
-#### frequency operations
-
-##### TUI shortcut key:
-
-- `ctrl+up/down/left/right`: Adjust the UI interface layout
-- `shift+up/down`: Adjust the height of the status UI panel
-- `shift+right`: Clear console
-- `shift+left`: Clear input text
-- `esc`: Force refresh interface
-
-##### Stage color explanation
-
-- `White`: To be executed
-- `Red`: Executing
-- `Green`: Execution passed
-- `*`: This stage requires human manual inspection. The AI can only continue after command `hmcheck_mass [msg]`
-- `Yellow`: Skipped stage
-
-##### Common interactive commands:
+##### Common interactive commands
 
 - `q`: Exit TUI (or exit UCAgent)
 - `tui`: Enter TUI
 - `tab`: Command completion
-- `tool_ist`: List all available tools
-- `tool_invote`: Manually call the tool
-- `help`: View all available commands
+- `tool_list`: List all available tools
+- `tool_invoke`: Manually invoke a tool
+- `help`: Show all command helps
 
 ---
 
@@ -262,7 +174,7 @@ ucagent --upgrade
 
 #### 1. MCP-Server with Code Agent (Recommended)
 
-This mode enables collaborative verification with all LLM clients that support MCP-Server calls, such as: Cherry Studio, Claude Code, Gemini-CLI, VS Code Copilot, Qwen-Code, Qoder, etc.
+This mode enables collaborative verification with all LLM clients that support MCP-Server calls, such as Cherry Studio, Claude Code, Gemini-CLI, VS Code Copilot, Qwen-Code, Qoder, etc.
 
 When starting UCAgent, enable the corresponding service through `mcp-server` related parameters.
 
@@ -367,7 +279,7 @@ UCAgent supports human-machine collaboration during the verification process, al
 1. Pause AI execution:
 
 - In direct access to LLM mode: Press `Ctrl+C` to pause.
-- In Code Agent collaborative mode: pause according to the pause method of the agent (such as Gemini cl using `Esc`).
+- In Code Agent collaborative mode: pause according to the agent (e.g., Gemini‑CLI uses `Esc`).
 
 2. Manual intervention:
 
@@ -376,8 +288,8 @@ UCAgent supports human-machine collaboration during the verification process, al
 
 3. Stage control:
 
-- Use `tool_invote Check` to check the current stage status.
-- Use `tool_invote Complete` to mark the completion of the stage and move on to the next stage.
+- Use `tool_invoke Check` to check the current stage status.
+- Use `tool_invoke Complete` to mark the completion of the stage and move on to the next stage.
 
 4. Continue to execute:
 
@@ -386,7 +298,7 @@ UCAgent supports human-machine collaboration during the verification process, al
 
 5. Permission management:
 
-- File write permissions can be set using commands such as `add_un_writable_path` and `del_un_writable_path` to control whether AI can edit specific files.
+- File write permissions can be set using commands such as `add_un_write_path` and `del_un_write_path` to control whether AI can edit specific files.
 - Suitable for direct access to LLM or mandatory use of UCAgent file tools.
 
 Notes:
@@ -395,9 +307,9 @@ Notes:
 - In the forced Human Check phase, manual approval is required by executing the command `hmcheck_pass [message]`
 - For certain stages of the Checker, the forced Human Check can also be enabled via the parameter `need_human_check: true`
 
-### Multi language support for config and guid doc
+### Multi-language support for config and guide docs
 
-At present, the repo only provides Chinese version. If you need other languages, you can find the 'lang-dir' directory through `ucagent -- check`:
+At present, the repo only provides a Chinese version. If you need other languages, you can find the `lang_dir` directory through `ucagent --check`:
 
 ```bash
 ucagent --check
@@ -410,13 +322,112 @@ Check   'zh' Guide_Doc  ~/python3.11/site-packages/vagent/lang/zh/doc/Guide_Doc 
 Check   'zh' template   ~/python3.11/site-packages/vagent/lang/zh/template/unity_test    [Found]
 ```
 
-Enter the `lang_ir` directory, copy a copy using the command `cp -r zh en`, then translate it into the target language, and finally set it in the configuration file:
+Enter the `lang_dir` directory, copy via `cp -r zh en`, then translate into the target language, and finally set it in the configuration file:
 
 ```yaml
 lang: "en"
 ```
 
-Alternatively, by specifying parameters: `--config`, `--template-dir`, `--guid-doc-path` to the target language file, a similar effect can be achieved.
+Alternatively, by specifying parameters `--config`, `--template-dir`, `--guide-doc-path` to the target language file, a similar effect can be achieved.
+
+---
+
+### Documentation Build & Preview (MkDocs)
+
+Makefile provides helper targets for docs (MkDocs + Material):
+
+| Target              | Purpose                                              | When to Use                         |
+| ------------------- | ---------------------------------------------------- | ----------------------------------- |
+| `make docs-help`    | Show documentation-related targets help text         | View available commands             |
+| `make docs-install` | Install build deps from `docs/requirements-docs.txt` | First time or deps update           |
+| `make docs-serve`   | Local preview (default: 127.0.0.1:8030)              | When developing/previewing          |
+| `make docs-build`   | Build static site into `docs/site`                   | Generate production version locally |
+| `make docs-clean`   | Remove `docs/site` directory                         | When cleaning build artifacts       |
+
+#### Usage Workflow
+
+**First Time Setup (Install Dependencies):**
+
+```bash
+make docs-install    # Install mkdocs, material theme, and other dependencies
+```
+
+**Daily Development (Preview Docs):**
+
+```bash
+make docs-serve      # Start local server, visit http://127.0.0.1:8030 to view
+# Browser auto-refreshes when you edit docs
+```
+
+**Local Generation (Build Production Version):**
+
+```bash
+make docs-build      # Generate static site to docs/site directory
+# Open docs/site/index.html in your local browser to view
+make docs-clean      # Clean build artifacts (optional)
+```
+
+#### Complete Workflow Example
+
+```bash
+# 1. Initial setup: Install dependencies
+make docs-install
+
+# 2. Development phase: Preview docs (can run repeatedly)
+make docs-serve      # Visit http://127.0.0.1:8030 in browser
+# ...edit docs...
+# Press Ctrl+C to stop server
+
+# 3. Local generation: Build production version
+make docs-build      # Generate ./site directory
+# Open ./site/index.html in your local browser to view
+
+# 4. Cleanup (optional)
+make docs-clean      # Remove ./site directory
+```
+
+#### Notes
+
+- Host/port currently fixed in `docs/Makefile`; edit if you need different values.
+- `make docs-serve` is for development use, supports hot reload
+- `make docs-build` generates static files to docs/site; open docs/site/index.html locally
+
+### PDF Manual Build (Pandoc + XeLaTeX)
+
+High-quality PDF (developer manual) build rules:
+
+| Target           | Purpose                                               |
+| ---------------- | ----------------------------------------------------- |
+| `make pdf`       | Build `ucagent-doc.pdf` from ordered markdown sources |
+| `make pdf-one`   | Same as `pdf` (CI convenience wrapper)                |
+| `make pdf-clean` | Remove generated PDF and LaTeX aux files              |
+
+Examples:
+
+```bash
+make pdf
+make MONO="JetBrains Mono" pdf       # override monospaced font
+make TWOSIDE=1 pdf                    # two‑sided layout (filename adds -twoside)
+make pdf-clean
+```
+
+Requirements: pandoc, XeLaTeX (TexLive) or Tectonic, Chinese font "Noto Serif CJK SC", monospaced font (default DejaVu Sans Mono), optional filter `pandoc-crossref`.
+
+Customization vars:
+
+- `MONO` override monospaced font.
+- `TWOSIDE` non-empty enables two-sided layout.
+
+Notes & Troubleshooting:
+
+- CI uses Tectonic to auto-fetch LaTeX packages; locally the default engine is XeLaTeX. You can set `PDF_ENGINE=tectonic` when running `make` to use Tectonic locally.
+- Missing font: install CJK fonts (e.g. `fonts-noto-cjk`).
+- LaTeX errors: ensure XeLaTeX packages (or use Tectonic).
+- Crossrefs missing: ensure `pandoc-crossref` in PATH.
+
+Output file: `ucagent-doc.pdf` suitable for release distribution.
+
+---
 
 ### Frequently Asked Questions (FAQ)
 
@@ -446,7 +457,7 @@ Alternatively, by specifying parameters: `--config`, `--template-dir`, `--guid-d
 
 **Q: Why is there residual information from the last execution?**
 
-**A:** By default, UCAgent will search for the `.ucagend_info.json` file from the working directory to load the last execution information and continue executing. If historical information is not required, please delete the file or use the parameter `--no-history` to ignore the loading history.
+**A:** By default, UCAgent reads `.ucagent_info.json` in the working directory to resume the last execution. If you don't need history, delete that file or pass `--no-history`.
 
 ### Contributing
 
