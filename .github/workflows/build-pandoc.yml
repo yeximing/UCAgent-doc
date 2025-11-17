@@ -49,6 +49,8 @@ jobs:
         env:
           HOME: /root
           PDF_ENGINE: tectonic
+          LANG: C.UTF-8
+          LC_ALL: C.UTF-8
         run: |
           git config --global --add safe.directory $(pwd)
           make pdf-one
