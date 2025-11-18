@@ -46,22 +46,15 @@ jobs:
           pandoc-crossref --version
           fc-list | grep -i "Noto" | head -n 5 || true
 
-      - name: Verify PDF engine availability
-        run: |
-          echo "Checking available PDF engines..."
-          for engine in tectonic xelatex lualatex pdflatex; do
-            if command -v $engine >/dev/null 2>&1; then
-              echo "✅ $engine: $(which $engine)"
-              $engine --version 2>&1 | head -n 1 || echo "  (version check failed)"
-            else
-              echo "❌ $engine: not found"
-            fi
-          done
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-tags: true
+
+      - name: Fix repository ownership
+        run: |
+          # 修复容器中的文件所有权问题，避免 git safe.directory 警告
+          chown -R $(id -u):$(id -g) .
 
       - name: Build PDF (oneside)
         env:
@@ -70,7 +63,6 @@ jobs:
           LANG: C.UTF-8
           LC_ALL: C.UTF-8
         run: |
-          git config --global --add safe.directory $(pwd)
           make pdf-one
 
       - name: Upload PDFs
