@@ -8,6 +8,11 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write # 创建 tag 和 release
+  pages: write # 部署 Pages
+  id-token: write # Pages 认证
+
 jobs:
   create-release-tag:
     name: Create tag
@@ -21,13 +26,24 @@ jobs:
         run: echo "TAG_NAME=${{ github.event.inputs.release_name }}" >> $GITHUB_ENV
 
       - name: Create tag and push
+        id: tag_check
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main || true
           git checkout main || true
-          git tag "$TAG_NAME"
-          git push origin "$TAG_NAME"
+
+          # 检查 tag 是否已存在
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Tag $TAG_NAME already exists."
+            echo "Will update the existing release with new artifacts."
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Creating new tag $TAG_NAME"
+            git tag "$TAG_NAME"
+            git push origin "$TAG_NAME"
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+          fi
 
   build-docs:
     name: Build docs via reusable workflow
@@ -56,22 +72,38 @@ jobs:
       - name: Move artifacts to flat layout
         run: |
           mkdir -p dist
-          shopt -s globstar nullglob
-          for f in pdfs/**/**/*.pdf pdfs/**/*.pdf pdfs/*.pdf; do
-            cp "$f" dist/
-          done
+          find pdfs -name "*.pdf" -exec cp {} dist/ \;
 
-      - name: List PDFs (optional)
+      - name: Verify PDFs exist
         run: |
-          echo "PDF files:" 
-          ls -l pdfs || true
+          if [ -z "$(ls -A dist/*.pdf 2>/dev/null)" ]; then
+            echo "Error: No PDF files found in dist/"
+            exit 1
+          fi
+          echo "Found PDF files:"
+          ls -lh dist/*.pdf
 
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.release_name }}
-          name: ${{ github.event.inputs.release_name }}
+          name: UCAgent 开发者手册 ${{ github.event.inputs.release_name }}
+          body: |
+            **UCAgent 开发者手册 PDF**
+
+            本 Release 包含项目文档的 PDF 版本。
+
+            **文件说明：**
+            - `ucagent-doc.pdf` - 单面打印版本
+
+            **在线文档：** https://yeximing.github.io/UCAgent-doc/
+
+            ---
+
+            🔧 构建信息：
+            - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - Commit: ${{ github.sha }}
           files: |
             dist/*.pdf
         env:
