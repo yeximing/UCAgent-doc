@@ -3,8 +3,14 @@ name: build-pandoc-pdf
 on:
   push:
     branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/build-pandoc.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/build-pandoc.yml"
   workflow_call:
 
 jobs:
@@ -40,6 +46,18 @@ jobs:
           pandoc-crossref --version
           fc-list | grep -i "Noto" | head -n 5 || true
 
+      - name: Verify PDF engine availability
+        run: |
+          echo "Checking available PDF engines..."
+          for engine in tectonic xelatex lualatex pdflatex; do
+            if command -v $engine >/dev/null 2>&1; then
+              echo "✅ $engine: $(which $engine)"
+              $engine --version 2>&1 | head -n 1 || echo "  (version check failed)"
+            else
+              echo "❌ $engine: not found"
+            fi
+          done
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -61,4 +79,3 @@ jobs:
           name: ucagent-doc
           path: |
             ucagent-doc.pdf
-
